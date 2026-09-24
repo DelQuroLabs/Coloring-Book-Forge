@@ -1,0 +1,50 @@
+[
+  {
+    "id": "cute_farm_animals",
+    "emoji": "\ud83d\udc04",
+    "label": "Cute Farm Animals & Barnyard Friends",
+    "description": "Cows, pigs, sheep, goats, chickens, horses, and fuzzy barnyard friends \u2014 a classic KDP best-seller across every age tier.",
+    "count": 400,
+    "file": "niche_packs/cute_farm_animals.json"
+  },
+  {
+    "id": "mighty_things_that_go",
+    "emoji": "\ud83d\ude9c",
+    "label": "Mighty Things That Go (Toddler Vehicles)",
+    "description": "Chunky, cheerful cars, trucks, trains, planes and boats \u2014 round, friendly, and designed for the youngest colorers but available across all four tiers.",
+    "count": 400,
+    "file": "niche_packs/mighty_things_that_go.json"
+  },
+  {
+    "id": "woodland_forest_creatures",
+    "emoji": "\ud83e\udd8a",
+    "label": "Woodland Forest Creatures",
+    "description": "Foxes, owls, deer, hedgehogs, mushrooms and forest magic \u2014 a top cozy/hygge seller for adults and kids alike.",
+    "count": 400,
+    "file": "niche_packs/woodland_forest_creatures.json"
+  },
+  {
+    "id": "mermaids_underwater_princesses",
+    "emoji": "\ud83e\udddc\u200d\u2640\ufe0f",
+    "label": "Mermaids & Underwater Princesses",
+    "description": "Mermaids, seashell kingdoms, underwater friends and sunken treasures \u2014 pairs naturally with Unicorns/Fairies and Ocean.",
+    "count": 400,
+    "file": "niche_packs/mermaids_underwater_princesses.json"
+  },
+  {
+    "id": "silly_monsters_aliens",
+    "emoji": "\ud83d\udc7e",
+    "label": "Silly Monsters & Friendly Aliens",
+    "description": "Cute not-scary monsters, aliens, blobs and UFOs \u2014 broad kid appeal across 2-12 and a fun quirky-adult twist.",
+    "count": 400,
+    "file": "niche_packs/silly_monsters_aliens.json"
+  },
+  {
+    "id": "sports_action_heroes",
+    "emoji": "\u26bd",
+    "label": "Sports & Action Heroes",
+    "description": "Soccer, basketball, gymnastics, skateboarding, martial arts and more \u2014 a strong 4-12 seller and a nice adult wellness angle.",
+    "count": 400,
+    "file": "niche_packs/sports_action_heroes.json"
+  }
+]

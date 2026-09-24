@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Coloring Book Forge — 36,000 Prompt Engine & DALL-E 3 Automation</title>
+<style>
+  :root{
+    --primary:#4F46E5;--primary-hover:#4338CA;--accent:#10B981;--accent-hover:#059669;
+    --warning:#F59E0B;--danger:#EF4444;--dark:#0F172A;--slate:#1E293B;--muted:#64748B;
+    --light-bg:#F8FAFC;--border:#E2E8F0;--radius:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--light-bg);color:var(--slate);display:flex;height:100vh;overflow:hidden}
+  .sidebar{width:310px;background:var(--dark);color:#F8FAFC;display:flex;flex-direction:column;flex-shrink:0;border-right:1px solid #1E293B}
+  .sidebar-header{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .brand-badge{display:inline-block;background:rgba(99,102,241,.25);color:#A5B4FC;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:3px 8px;border-radius:4px;margin-bottom:6px}
+  .brand-name{font-size:19px;font-weight:800;display:flex;align-items:center;gap:8px}
+  .brand-tagline{font-size:12px;color:#94A3B8;margin-top:2px}
+  .sidebar-scroll{flex:1;overflow-y:auto;padding:10px}
+  .nav-group-header{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#64748B;padding:10px 12px 6px}
+  .nav-link{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;border-radius:8px;font-size:13px;font-weight:600;color:#CBD5E1;cursor:pointer;transition:.15s;margin-bottom:2px}
+  .nav-link:hover{background:rgba(255,255,255,.08);color:#fff}
+  .nav-link.active{background:var(--primary);color:#fff}
+  .nav-link.niche{border-left:3px solid var(--accent)}
+  .badge-count{font-size:11px;background:rgba(255,255,255,.12);padding:2px 6px;border-radius:10px}
+  .badge-count.new{background:var(--accent);color:#fff}
+  .main-area{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  .topbar{background:#fff;border-bottom:1px solid var(--border);padding:10px 18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .topbar-left,.topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .age-toggle-group,.batch-toggle-group{display:flex;background:#F1F5F9;padding:3px;border-radius:8px;border:1px solid var(--border);gap:2px}
+  .batch-toggle-group{background:#FEF3C7;border-color:#FCD34D}
+  .age-toggle-btn,.batch-toggle-btn{padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;border:none;cursor:pointer;background:0 0;color:var(--muted);transition:.15s;white-space:nowrap}
+  .batch-toggle-btn{color:#92400E}
+  .age-toggle-btn.active{background:#fff;color:var(--primary);box-shadow:0 1px 2px rgba(0,0,0,.06)}
+  .batch-toggle-btn.active{background:#fff;color:#78350F;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+  .search-box{max-width:260px;position:relative}
+  .search-input{width:100%;padding:7px 12px 7px 30px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:0;background:#F8FAFC}
+  .search-input:focus{background:#fff;border-color:var(--primary)}
+  .search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#94A3B8;font-size:12px}
+  .btn{padding:7px 11px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--slate);display:inline-flex;align-items:center;gap:6px;transition:.15s;white-space:nowrap}
+  .btn:hover{border-color:var(--primary);color:var(--primary)}
+  .btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}.btn-primary:hover{background:var(--primary-hover);color:#fff}
+  .btn-accent{background:var(--accent);color:#fff;border-color:var(--accent)}.btn-accent:hover{background:var(--accent-hover);color:#fff}
+  .btn-warning{background:#FEF3C7;color:#92400E;border-color:#FCD34D}
+  .btn-danger{background:#FEE2E2;color:#991B1B;border-color:#FCA5A5}
+  .viewport{flex:1;overflow-y:auto;padding:20px 24px}
+  .banner{background:linear-gradient(135deg,#1E1B4B,#312E81);color:#fff;border-radius:var(--radius);padding:18px 22px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 4px 6px -1px rgba(0,0,0,.1)}
+  .banner-title{font-size:19px;font-weight:800;margin-bottom:4px}
+  .banner-subtitle{font-size:13px;color:#C7D2FE;max-width:680px}
+  .banner-stat-box{text-align:right;background:rgba(255,255,255,.1);padding:8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.15)}
+  .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
+  .prompt-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 1px 3px rgba(0,0,0,.05);transition:.15s;position:relative}
+  .prompt-card:hover{transform:translateY(-2px);box-shadow:0 6px 12px -2px rgba(0,0,0,.08)}
+  .prompt-card.new-set{border-color:var(--accent)}
+  .card-topbar{display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap}
+  .card-idx-pill{font-size:11px;font-weight:700;background:#EEF2FF;color:var(--primary);padding:2px 7px;border-radius:6px}
+  .card-age-pill{font-size:11px;font-weight:600;background:#F1F5F9;color:#475569;padding:2px 7px;border-radius:6px}
+  .card-new-pill{font-size:10px;font-weight:700;background:#D1FAE5;color:#065F46;padding:2px 7px;border-radius:6px}
+  .card-fractal-pill{font-size:10px;font-weight:700;background:#EDE9FE;color:#5B21B6;padding:2px 7px;border-radius:6px}
+  .card-title{font-size:15px;font-weight:700;color:var(--dark);margin-bottom:2px}
+  .card-meta{font-family:monospace;font-size:10px;color:#64748B;background:#F8FAFC;padding:2px 5px;border-radius:4px;display:inline-block;margin-bottom:8px;word-break:break-all}
+  .card-image-preview{width:100%;height:210px;background:#000;border-radius:8px;margin-bottom:10px;display:none;overflow:hidden;position:relative;border:2px solid var(--accent)}
+  .card-image-preview img{width:100%;height:100%;object-fit:contain;background:#fff}
+  .preview-badge{position:absolute;top:8px;right:8px;background:rgba(16,185,129,.9);color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px}
+  .prompt-box{background:#0F172A;color:#E2E8F0;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;line-height:1.4;padding:10px;border-radius:8px;height:110px;overflow-y:auto;word-break:break-word;cursor:pointer;user-select:all;margin-bottom:10px;border:1px solid transparent}
+  .prompt-box:hover{border-color:#6366F1}
+  .card-actions-row{display:flex;gap:8px}
+  .btn-forge{background:linear-gradient(135deg,#10B981,#059669);color:#fff;border:none;padding:8px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;flex:1;display:flex;align-items:center;justify-content:center;gap:6px;transition:.2s}
+  .btn-forge:hover{opacity:.9}.btn-forge:disabled{opacity:.5;cursor:not-allowed}
+  .btn-copy{background:#F1F5F9;color:var(--slate);border:1px solid var(--border);padding:8px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer}
+  .modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.7);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:10000;padding:20px}
+  .modal-box{background:#fff;border-radius:12px;max-width:780px;width:100%;padding:26px;box-shadow:0 20px 25px -5px rgba(0,0,0,.3);max-height:88vh;display:flex;flex-direction:column}
+  .toast{position:fixed;bottom:24px;right:24px;background:#10B981;color:#fff;padding:12px 20px;border-radius:8px;font-weight:600;font-size:14px;box-shadow:0 10px 15px -3px rgba(0,0,0,.2);display:none;z-index:10001}
+  .dot{width:8px;height:8px;border-radius:50%;background:#94A3B8}.dot.green{background:#10B981}.dot.yellow{background:#F59E0B}
+  .niche-card{background:#F8FAFC;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
+  .niche-card.installed{border-color:var(--accent);background:#ECFDF5}
+  .offline-status{font-size:11px;color:#64748B;margin-left:6px}
+  .storage-bar{display:flex;align-items:center;gap:6px;font-size:11px;color:#94A3B8;padding:4px 8px;background:#F1F5F9;border-radius:6px}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <span class="brand-badge">KDP Production Engine</span>
+    <div class="brand-name">⚙️ Coloring Book Forge</div>
+    <div class="brand-tagline" id="brandTagline">Loading…</div>
+  </div>
+  <div class="sidebar-scroll">
+    <div class="nav-group-header">Book Categories</div>
+    <div id="sidebarCategories"></div>
+    <div class="nav-group-header" style="margin-top:12px">Creator Studio</div>
+    <div class="nav-link" onclick="openIdeasModal()"><span>💡 Discover Fresh Niches</span><span class="badge-count" style="background:#F59E0B;color:#0F172A">+Add</span></div>
+    <div class="nav-link" onclick="openStorageModal()"><span>💾 Data &amp; Backups</span><span class="badge-count" style="background:#6366F1;color:#fff">Export/Import</span></div>
+    <div class="nav-link" onclick="openBookBuilder()"><span>📘 KDP Book Builder</span><span class="badge-count" style="background:#10B981;color:#fff">NEW</span></div>
+    <div class="nav-link" onclick="openProductionBot()"><span>🤖 Production Bot</span><span class="badge-count" style="background:linear-gradient(90deg,#8B5CF6,#EC4899);color:#fff">2/WK</span></div>
+  </div>
+</aside>
+<main class="main-area">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="age-toggle-group">
+        <button class="age-toggle-btn active" data-age="Ages 2-4" onclick="setAge('Ages 2-4')">👶 2–4</button>
+        <button class="age-toggle-btn" data-age="Ages 4-8" onclick="setAge('Ages 4-8')">🧒 4–8</button>
+        <button class="age-toggle-btn" data-age="Ages 8-12" onclick="setAge('Ages 8-12')">🧑 8–12</button>
+        <button class="age-toggle-btn" data-age="Adults & Teens" onclick="setAge('Adults & Teens')">☕ Adults</button>
+      </div>
+      <div class="batch-toggle-group">
+        <button class="batch-toggle-btn active" data-batch="all" onclick="setBatch('all')">All 300</button>
+        <button class="batch-toggle-btn" data-batch="1" onclick="setBatch('1')">Set 1</button>
+        <button class="batch-toggle-btn" data-batch="2" onclick="setBatch('2')">Set 2 NEW</button>
+        <button class="batch-toggle-btn" data-batch="3" onclick="setBatch('3')">Set 3 NEW</button>
+      </div>
+      <div class="search-box"><span class="search-icon">🔍</span><input type="text" id="globalSearch" class="search-input" placeholder="Search prompts..." oninput="handleSearch()"></div>
+    </div>
+    <div class="topbar-right">
+      <div class="btn" id="apiStatusBtn" onclick="openApiKeyModal()" style="cursor:pointer"><span class="dot yellow" id="apiDot"></span><span id="apiStatusText">Test Mode</span></div>
+      <span class="offline-status" id="offlineStatus">Offline: loading…</span>
+      <span class="storage-bar" id="storageBar">💾 — prompts loaded</span>
+      <button class="btn btn-warning" onclick="openIdeasModal()">💡 Niches</button>
+      <button class="btn btn-accent" onclick="openBookBuilder()">📘 Build KDP Book</button>
+      <button class="btn" onclick="exportCSV()">📊 CSV</button>
+      <button class="btn btn-primary" onclick="copyCurrentView()">📑 Copy Page</button>
+    </div>
+  </header>
+  <div class="viewport" id="viewport"><div style="padding:40px;text-align:center;color:var(--muted)">Loading...</div></div>
+</main>
+<div class="toast" id="toastMessage">✓ Done!</div>
+
+<!-- API Key Modal -->
+<div class="modal-backdrop" id="apiKeyModal" onclick="if(event.target.id==='apiKeyModal')closeApiKeyModal()">
+  <div class="modal-box">
+    <h3 style="font-size:20px;font-weight:800;color:var(--dark);margin-bottom:6px">🔑 OpenAI API Key</h3>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Enter your OpenAI key. Images save to <code>output_production/{category}/{filename}</code>.</p>
+    <label style="display:block;font-size:13px;font-weight:700;margin-bottom:6px">API Key (sk-...):</label>
+    <input type="password" id="apiKeyInput" style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-family:monospace;font-size:14px;margin-bottom:12px" placeholder="sk-proj-...">
+    <div style="background:#F8FAFC;border:1px solid var(--border);padding:10px;border-radius:8px;font-size:12px;color:#475569;margin-bottom:16px">🔒 Stored in localStorage only.</div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <button class="btn btn-danger" onclick="clearApiKey()">Test Mode</button>
+      <div style="display:flex;gap:10px"><button class="btn" onclick="closeApiKeyModal()">Cancel</button><button class="btn btn-primary" onclick="saveApiKey()">Save</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Niche Modal -->
+<div class="modal-backdrop" id="nicheIdeasModal" onclick="if(event.target.id==='nicheIdeasModal')closeIdeasModal()">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="font-size:20px;font-weight:800;color:var(--dark)">💡 Discover &amp; Add Niches</h3><button class="btn" onclick="fetchMoreIdeas()">🔄 Refresh</button></div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Installed niches show a ✓; drop new packs into <code>niche_packs/</code> and restart to add more. Snow/Winter/Christmas coming next.</p>
+    <div style="flex:1;overflow-y:auto;padding-right:6px" id="nicheIdeasList"></div>
+    <div style="margin-top:14px;text-align:right"><button class="btn btn-primary" onclick="closeIdeasModal()">Close</button></div>
+  </div>
+</div>
+
+<!-- Storage / Backup Modal -->
+<div class="modal-backdrop" id="storageModal" onclick="if(event.target.id==='storageModal')closeStorageModal()">
+  <div class="modal-box" style="max-width:680px">
+    <h3 style="font-size:20px;font-weight:800;color:var(--dark);margin-bottom:6px">💾 Data Backups &amp; Migration</h3>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Download the full prompt library so you can move to another server, or import a previously saved JSON (or niche pack) to merge new prompts into the live library.</p>
+
+    <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px">
+      <h4 style="font-size:14px;font-weight:700;margin-bottom:8px">⬇️ Download (offline copy)</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button class="btn btn-primary" onclick="downloadLibrary('all','json')">📥 Full Library (36k JSON)</button>
+        <button class="btn" onclick="downloadLibrary('all','json.gz')">🗜️ Full Library (gzipped ~2 MB)</button>
+        <button class="btn" onclick="downloadLibrary('current','json')">🎯 Current view only (JSON)</button>
+        <button class="btn" onclick="downloadLibrary('current','csv')">📄 Current view CSV</button>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-top:8px">Full downloads include every record with schema <code>id,category_id,category_slug,category_index,age_group,subject,action,environment,filename,master_prompt,...</code>. Ready to re-import into the production server.</p>
+    </div>
+
+    <div style="background:#FEF3C7;border:1px solid #FCD34D;border-radius:10px;padding:14px;margin-bottom:14px">
+      <h4 style="font-size:14px;font-weight:700;margin-bottom:8px">⬆️ Upload (merge into library)</h4>
+      <p style="font-size:12px;color:#78350F;margin-bottom:10px">Select a prompt JSON (master file or niche pack). Records are merged into the running library (client-side only until a server migration; a downloadable merged file is produced for production deploy). Images saved to <code>output_production/</code> are not included — copy that folder separately.</p>
+      <input type="file" id="importFile" accept=".json,.json.gz" style="font-size:13px;margin-bottom:8px;width:100%">
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-accent" onclick="importLibrary()">📥 Merge Selected File</button>
+        <button class="btn btn-danger" onclick="resetLibrary()">♻️ Reset to Server State</button>
+      </div>
+      <div id="importStatus" style="font-size:12px;color:#78350F;margin-top:8px"></div>
+    </div>
+
+    <div style="background:#ECFDF5;border:1px solid #6EE7B7;border-radius:10px;padding:14px;margin-bottom:4px">
+      <h4 style="font-size:14px;font-weight:700;margin-bottom:6px">📦 Production migration path</h4>
+      <ol style="font-size:12px;color:#065F46;padding-left:20px;line-height:1.5">
+        <li>Click <strong>Full Library (gzipped ~2 MB)</strong> to download your master prompt JSON.</li>
+        <li>Copy the <code>output_production/</code> folder via zip/download for any already-forged images.</li>
+        <li>On the production server, drop the JSON into the app directory as <code>coloring_prompts_master_36000.json</code> and restart — the server picks it up automatically.</li>
+        <li>To add new categories later, drop files into <code>niche_packs/</code> following the existing schema.</li>
+      </ol>
+    </div>
+
+    <div style="margin-top:14px;text-align:right"><button class="btn btn-primary" onclick="closeStorageModal()">Close</button></div>
+  </div>
+</div>
+
+<!-- Copy Modal -->
+<div class="modal-backdrop" id="copyFallbackModal" onclick="if(event.target.id==='copyFallbackModal')closeCopyModal()">
+  <div class="modal-box">
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:6px" id="copyModalHeader">Copy Prompt</h3>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:10px">Press <strong>Ctrl+C</strong> / <strong>Cmd+C</strong>:</p>
+    <textarea id="copyModalText" style="width:100%;height:140px;padding:10px;font-family:monospace;font-size:12px;border:2px solid var(--primary);border-radius:8px;margin-bottom:12px" readonly onclick="this.select()"></textarea>
+    <div style="display:flex;justify-content:flex-end;gap:10px"><button class="btn" onclick="closeCopyModal()">Close</button><button class="btn btn-primary" onclick="copyFromModalText()">Copy</button></div>
+  </div>
+</div>
+
+<!-- KDP Book Builder Panel (shown full viewport instead of modal so it has room) -->
+<div class="modal-backdrop" id="bookBuilderPanel" style="background:var(--light-bg);align-items:flex-start;justify-content:flex-start;padding:0;overflow-y:auto">
+  <div style="max-width:1100px;width:100%;margin:0 auto;padding:28px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <div>
+        <h2 style="font-size:26px;font-weight:800;color:var(--dark);display:flex;align-items:center;gap:10px">📘 KDP Coloring Book Builder</h2>
+        <p style="font-size:13px;color:var(--muted);margin-top:4px">Configure a full KDP-ready paperback interior, front cover, back cover, and download a production package to run DALL-E 3 either locally or on your production server. <strong>Image forging does not run in this sandbox.</strong></p>
+      </div>
+      <button class="btn" onclick="closeBookBuilder()">← Back to Forge</button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+      <!-- Book settings card -->
+      <div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.05)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+          <h3 style="font-size:16px;font-weight:800;margin:0;color:var(--dark)">1. Book Specs (Amazon KDP)</h3>
+          <button class="btn btn-primary" onclick="autoPlanBook()" style="background:linear-gradient(90deg,#8B5CF6,#EC4899);border:none;color:white">✨ Auto-Plan Next Book (GPT + KDP data)</button>
+        </div>
+        <div id="autoPlanSummary" style="display:none;background:#EDE9FE;border:1px solid #A78BFA;border-radius:8px;padding:10px;font-size:12px;color:#4C1D95;margin-bottom:10px"></div>
+        <label style="display:block;font-size:12px;font-weight:700;margin:8px 0 4px">Trim Size</label>
+        <select id="bkSize" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+          <option value="8.5x11">8.5" × 11" (US Letter — most popular for KDP coloring)</option>
+          <option value="8x10">8" × 10"</option>
+          <option value="7.5x9.25">7.5" × 9.25"</option>
+          <option value="6x9">6" × 9"</option>
+        </select>
+        <label style="display:block;font-size:12px;font-weight:700;margin:10px 0 4px">Bleed</label>
+        <select id="bkBleed" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+          <option value="bleed">Bleed (images extend to edge — recommended for coloring)</option>
+          <option value="nobleed">No Bleed (white border)</option>
+        </select>
+        <label style="display:block;font-size:12px;font-weight:700;margin:10px 0 4px">Interior Paper</label>
+        <select id="bkPaper" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+          <option value="white">White paper</option>
+          <option value="cream">Cream paper</option>
+        </select>
+        <label style="display:block;font-size:12px;font-weight:700;margin:10px 0 4px">Page Count (coloring interior pages)</label>
+        <input type="number" id="bkPages" min="10" max="400" step="10" value="50" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Total printed pages = cover (front/back) + title + copyright + coloring pages + about author. Amazon requires 24–828 pages.</div>
+      </div>
+
+      <!-- Content card -->
+      <div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.05)">
+        <h3 style="font-size:16px;font-weight:800;margin-bottom:12px;color:var(--dark)">2. Book Theme &amp; Content</h3>
+        <label style="display:block;font-size:12px;font-weight:700;margin:8px 0 4px">Book Title</label>
+        <input type="text" id="bkTitle" placeholder="e.g. Cozy Farm Animals Coloring Book" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+        <label style="display:block;font-size:12px;font-weight:700;margin:10px 0 4px">Subtitle</label>
+        <input type="text" id="bkSubtitle" placeholder="Bold &amp; Easy Coloring for Adults &amp; Kids" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+        <label style="display:block;font-size:12px;font-weight:700;margin:10px 0 4px">Author Name</label>
+        <input type="text" id="bkAuthor" placeholder="Your Pen Name" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+        <label style="display:block;font-size:12px;font-weight:700;margin:10px 0 4px">Category</label>
+        <select id="bkCategory" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px"></select>
+        <label style="display:block;font-size:12px;font-weight:700;margin:10px 0 4px">Age Tier</label>
+        <select id="bkAge" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+          <option value="Ages 2-4">Ages 2–4 (Toddler Bold &amp; Easy)</option>
+          <option value="Ages 4-8">Ages 4–8 (Kids Creative Action)</option>
+          <option value="Ages 8-12">Ages 8–12 (Tweens Detailed Adventure)</option>
+          <option value="Adults & Teens" selected>Adults &amp; Teens (Cozy Hygge / Bold &amp; Easy)</option>
+          <option value="MIX">Mixed — one page per tier (advanced)</option>
+        </select>
+        <label style="display:block;font-size:12px;font-weight:700;margin:10px 0 4px">Prompt Set to Use</label>
+        <select id="bkBatch" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+          <option value="1">Set 1 (original 100)</option>
+          <option value="2">Set 2 NEW (expansion)</option>
+          <option value="3">Set 3 NEW (RNG shuffled)</option>
+          <option value="all">Mix across all sets</option>
+          <option value="shuffle">Shuffle everything, pick random pages</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Cover + back + preview -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px">
+      <div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.05)">
+        <h3 style="font-size:16px;font-weight:800;margin-bottom:12px;color:var(--dark)">3. Front Cover Design</h3>
+        <label style="display:block;font-size:12px;font-weight:700;margin:8px 0 4px">Cover Style</label>
+        <select id="bkCoverStyle" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+          <option value="boldtitle">Bold Title + Single Hero Illustration</option>
+          <option value="collage">Collage of 4–6 illustrations</option>
+          <option value="minimal">Minimal — title only, decorative border</option>
+          <option value="circular">Circular wreath frame with central title</option>
+        </select>
+        <label style="display:block;font-size:12px;font-weight:700;margin:10px 0 4px">Cover Color Theme</label>
+        <select id="bkCoverColor" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+          <option value="pastel">Soft pastel (cream/blush/sage)</option>
+          <option value="bold">Bold primary (red/blue/yellow)</option>
+          <option value="earthy">Earthy (terracotta/olive/mustard)</option>
+          <option value="mono">Black &amp; white with accent color</option>
+        </select>
+        <label style="display:block;font-size:12px;font-weight:700;margin:10px 0 4px">Back Cover Blurb</label>
+        <textarea id="bkBlurb" rows="4" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit" placeholder="A short 2–3 sentence description of what's inside the book. This prints on the back cover."></textarea>
+      </div>
+
+      <div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.05)">
+        <h3 style="font-size:16px;font-weight:800;margin-bottom:12px;color:var(--dark)">4. Forge &amp; Export</h3>
+        <div style="background:#FEF3C7;border:1px solid #FCD34D;border-radius:8px;padding:10px;font-size:12px;color:#78350F;margin-bottom:12px">
+          ⚠️ <strong>Heads up:</strong> DALL-E 3 forging of 30–80 pages can consume $5–$20 of OpenAI credits and uses significant storage. Run it from your production server, not this sandbox.
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:8px"><input type="checkbox" id="bkIncludePrompts"> Include prompt text page opposite each illustration (art-journal style)</label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:8px"><input type="checkbox" id="bkTestMode" checked> Test mode first (uses sample images to verify layout)</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
+          <button class="btn btn-accent" onclick="generateBookPackage()">📦 1. Download Book Package (JSON + CSV + HTML preview)</button>
+          <button class="btn btn-primary" onclick="forgeAllBookImages()">⚡ 2. Forge All Images (production server only)</button>
+        </div>
+        <div id="bookBuildStatus" style="margin-top:12px;font-size:12px;color:var(--muted)"></div>
+        <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
+          <h4 style="font-size:13px;font-weight:700;margin-bottom:6px">What you get:</h4>
+          <ul style="font-size:12px;color:#475569;padding-left:18px;line-height:1.6">
+            <li><code>book_manifest.json</code> — every page with its prompt, filename, and KDP placement</li>
+            <li><code>book_prompts.csv</code> — spreadsheet for batch forging / tracking</li>
+            <li><code>kdp_preview.html</code> — printable book preview with KDP trim/bleed guides</li>
+            <li><code>forge_runner.py</code> — drop-and-run script that forges every image via DALL-E 3 on your production machine and saves them into <code>output_production/&lt;book&gt;/</code></li>
+            <li>Cover &amp; back-cover prompts prepared with correct trim/bleed dimensions</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Production Bot panel -->
+<div class="modal-backdrop" id="productionBotPanel" style="background:var(--light-bg);align-items:flex-start;justify-content:flex-start;padding:0;overflow-y:auto;display:none">
+  <div style="max-width:1100px;margin:0 auto;width:100%;padding:24px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <div>
+        <h2 style="font-size:22px;font-weight:900;margin:0;color:var(--dark)">🤖 Production Bot <span style="font-size:12px;color:#8B5CF6;font-weight:600;margin-left:8px;background:#EDE9FE;padding:2px 8px;border-radius:10px">2 books/week · hands-off</span></h2>
+        <p style="margin:4px 0 0;color:var(--muted);font-size:13px">Publishing cadence: <strong>Tuesday + Friday at 9 AM ET</strong> (best KDP launch window). Queue books below — the bot will auto-plan, package, and prepare them for forge. Run <code>forge_runner.py</code> on your production server, then upload to KDP.</p>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="closeProductionBot()">✕ Close</button>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+      <div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.05)">
+        <h3 style="font-size:15px;font-weight:800;margin:0 0 8px">📅 Upcoming Slot</h3>
+        <div id="prodNextSlot" style="font-size:13px;color:var(--dark);margin-bottom:10px">Calculating next publish date...</div>
+        <button class="btn btn-primary" onclick="autoPlanBook();openBookBuilder();closeProductionBot()" style="width:100%;background:linear-gradient(90deg,#8B5CF6,#EC4899);border:none;color:white">✨ Auto-Plan Next Book Now</button>
+        <h3 style="font-size:15px;font-weight:800;margin:16px 0 8px">📋 Publishing Queue</h3>
+        <div id="prodQueue" style="font-size:12px;color:#475569"></div>
+        <div style="margin-top:10px;display:flex;gap:6px">
+          <button class="btn" onclick="enqueueRandomBook()">➕ Add AI-picked book to queue</button>
+          <button class="btn" onclick="clearProdQueue()">🗑️ Clear</button>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.05)">
+        <h3 style="font-size:15px;font-weight:800;margin:0 0 8px">🚀 Publishing Checklist (per book)</h3>
+        <ol style="font-size:12px;color:#475569;line-height:1.8;padding-left:20px;margin:0 0 14px">
+          <li>✅ Click "Auto-Plan" → title/subtitle/blurb/keywords generated</li>
+          <li>📦 Click "Download Book Package" → get manifest + runner + preview</li>
+          <li>⚡ On production server: <code>python3 forge_runner.py book_manifest.json</code> (uses DALL-E 3)</li>
+          <li>🖼️ Spot-check 5–10 images; re-run bad ones with the runner's retry flag</li>
+          <li>📐 Open kdp_preview.html → Print-to-PDF with correct trim/bleed settings</li>
+          <li>🟢 KDP Bookshelf → create new Paperback → upload interior PDF + cover</li>
+          <li>🔑 Paste 7 backend keywords, categories, price $6.99 (coloring books)</li>
+          <li>📅 Schedule for the next Tue/Fri 9 AM ET slot</li>
+        </ol>
+        <h3 style="font-size:15px;font-weight:800;margin:12px 0 6px">🔑 API Keys Used</h3>
+        <div style="font-size:12px;color:#475569;line-height:1.7">
+          <strong>OpenAI (required for forging + smarter titles):</strong> paste in ⚙️ API Key. Uses DALL-E 3 1024×1792 @ $0.08/img (~$5/book) and optionally GPT-4o-mini (~$0.001/book) for titles/blurbs/keywords.<br>
+          <strong>No Amazon/KDP API key needed</strong> — upload to KDP manually (their API is invite-only for low-volume publishers).
+        </div>
+        <h3 style="font-size:15px;font-weight:800;margin:12px 0 6px">📊 Recommended Pricing</h3>
+        <div style="font-size:12px;color:#475569">
+          • 50–60 pages → <strong>$6.99</strong><br>
+          • 80–100 pages → <strong>$7.99</strong><br>
+          • Expanded distribution enabled; KDP pays ~$1.80–$2.40 royalty per book at these prices.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentCategory='Animals', currentAgeGroup='Ages 2-4', currentBatch='all';
+let openAiApiKey = localStorage.getItem('openai_api_key')||'';
+let diskInventory = {};
+let currentPrompts = [];
+let localPrompts = null; // if the user merges an upload, these replace the server copy
+let categoriesMeta=[]; let categoryCounts={};
+let serverTotal=0;
+
+const ageDescriptions = {
+  "Ages 2-4":"Toddler Bold & Easy — Extra bold black outlines, chunky shapes, pure white background.",
+  "Ages 4-8":"Kids Creative Action — Clean defined outlines, storytelling actions, scenic environments.",
+  "Ages 8-12":"Tweens Detailed Adventure — Crisp intricate linework, rich backgrounds, complex patterns.",
+  "Adults & Teens":"Cozy Hygge / Bold & Easy — Relaxing aesthetic compositions, satisfying bold lines, stress relief."
+};
+
+async function init(){
+  updateApiStatus();
+  try { await loadOfflineDataset(); } catch(e){ console.warn(e); }
+  await loadMeta();
+  await loadInventory();
+  renderSidebar();
+  await loadPrompts();
+}
+
+async function loadOfflineDataset(){
+  const s=document.getElementById('offlineStatus');
+  s.innerText='Downloading library for offline use...';
+  try{
+    const r = await fetch('/api/offline_dataset');
+    if(!r.ok) throw new Error('no endpoint');
+    const buf = await r.arrayBuffer();
+    const ds = new DecompressionStream('gzip');
+    const w = ds.writable.getWriter(); w.write(new Uint8Array(buf)); w.close();
+    const reader = ds.readable.getReader();
+    const chunks=[];
+    while(true){const{done,value}=await reader.read(); if(done) break; chunks.push(value);}
+    const blob = new Blob(chunks,{type:'application/json'});
+    const data = JSON.parse(await blob.text());
+    localPrompts = data;
+    s.innerText=`Offline: ${data.length.toLocaleString()} prompts ready`;
+    s.style.color='#059669';
+  } catch(e){
+    s.innerText='Online mode'; s.style.color='#92400E';
+  }
+}
+
+async function loadMeta(){
+  try{
+    const r = await fetch('/api/meta'); const d=await r.json();
+    categoriesMeta=d.categories||[]; categoryCounts=d.category_counts||{}; serverTotal=d.total_prompts;
+    const total = activePrompts().length;
+    document.getElementById('brandTagline').innerText=`${total.toLocaleString()} Prompts • 4 Age Levels • DALL-E 3 • 300/Category`;
+    updateStorageBar();
+  }catch(e){console.error(e)}
+}
+async function loadInventory(){
+  try{ const r=await fetch('/api/inventory'); const d=await r.json(); diskInventory=d.inventory||{}; }catch(e){diskInventory={}}
+}
+function activePrompts(){
+  // Client-side merged copy always wins if present.
+  if(localPrompts && localPrompts.length) return localPrompts;
+  // Server-fetched baseline (populated by /api/prompts and /api/offline_dataset).
+  if(offlineCache && offlineCache.length) return offlineCache;
+  return [];
+}
+let offlineCache = null;
+
+function renderSidebar(){
+  const c=document.getElementById('sidebarCategories'); c.innerHTML='';
+  categoriesMeta.forEach(([catId,icon,label])=>{
+    // Mark anything outside the original 23 base categories as a niche (new/expansion content)
+    const baseCats = new Set(["Animals","Large Machines on Wheels","Cars","Aircraft","Dogs","Cats","Buildings / City","Vehicles","Birds","Puppies","Kittens","Baby Animals","Space Objects","Fish","Flowers","Dinosaurs & Prehistoric","Kawaii Sweet Treats & Foods","Magical Unicorns & Fairies","Heavy Construction Diggers","Early Learning ABC & Numbers","Positive Affirmations & Mindful","Ocean & Deep Sea Explorers","Seasonal & Holiday Surges"]);
+    const isNiche = !baseCats.has(catId);
+    const link=document.createElement('div');
+    link.className=`nav-link ${catId===currentCategory?'active':''} ${isNiche?'niche':''}`;
+    link.onclick=()=>selectCategory(catId);
+    const total=categoryCounts[catId]||0; const perTier=total?total/4:'—';
+    link.innerHTML=`<span>${icon} ${label}</span><span class="badge-count ${isNiche?'new':''}">${perTier}</span>`;
+    c.appendChild(link);
+  });
+}
+function updateStorageBar(){
+  const total = activePrompts().length;
+  document.getElementById('storageBar').innerText = `💾 ${total.toLocaleString()} prompts loaded`;
+}
+function selectCategory(c){currentCategory=c;renderSidebar();document.getElementById('globalSearch').value='';loadPrompts()}
+function setAge(a){
+  currentAgeGroup=a;
+  document.querySelectorAll('.age-toggle-btn').forEach(b=>b.classList.toggle('active',b.dataset.age===a));
+  loadPrompts();
+}
+function setBatch(b){
+  currentBatch=b;
+  document.querySelectorAll('.batch-toggle-btn').forEach(btn=>btn.classList.toggle('active',btn.dataset.batch===b));
+  loadPrompts();
+}
+
+async function loadPrompts(){
+  const vp=document.getElementById('viewport');
+  vp.innerHTML='<div style="padding:40px;text-align:center;color:var(--muted)">Loading...</div>';
+  let items=[];
+  try{
+    if(localPrompts){
+      items=localPrompts.filter(matches);
+    } else {
+      const url=`/api/prompts?category=${encodeURIComponent(currentCategory)}&age_group=${encodeURIComponent(currentAgeGroup)}&batch=${currentBatch}`;
+      const r=await fetch(url); const d=await r.json(); items=d.prompts||[];
+      offlineCache = offlineCache || await fetchOfflineBaseline();
+    }
+  }catch(e){
+    if(offlineCache){ items=offlineCache.filter(matches); showToast('Offline fallback — server unreachable'); }
+    else { vp.innerHTML=`<div style="padding:40px;text-align:center;color:#EF4444">Error: ${e.message}</div>`; return; }
+  }
+  currentPrompts=items;
+  renderCards(items);
+}
+async function fetchOfflineBaseline(){
+  try{
+    const r=await fetch('/api/offline_dataset'); if(!r.ok) return null;
+    const buf=await r.arrayBuffer();
+    const ds=new DecompressionStream('gzip'); const w=ds.writable.getWriter(); w.write(new Uint8Array(buf)); w.close();
+    const reader=ds.readable.getReader(); const chunks=[];
+    while(true){const{done,value}=await reader.read();if(done)break;chunks.push(value)}
+    return JSON.parse(await new Blob(chunks).text());
+  }catch(e){return null}
+}
+function matches(p){
+  if(p.category_id!==currentCategory) return false;
+  if(p.age_group!==currentAgeGroup) return false;
+  if(currentBatch==='1'&&p.category_index>100) return false;
+  if(currentBatch==='2'&&(p.category_index<=100||p.category_index>200)) return false;
+  if(currentBatch==='3'&&p.category_index<=200) return false;
+  return true;
+}
+
+function renderCards(items){
+  const vp=document.getElementById('viewport'); vp.innerHTML='';
+  const slug=items[0]?.category_slug||'general';
+  const perTier=items.length;
+  const isFractal=items[0]?.category_slug==='abstract_fractals_patterns';
+  const catTotal = categoryCounts[currentCategory]||perTier*4;
+  const banner=document.createElement('div'); banner.className='banner';
+  banner.innerHTML=`<div><div class="banner-title">${currentCategory} — ${currentAgeGroup}</div>
+    <div class="banner-subtitle">${ageDescriptions[currentAgeGroup]||''} • ${perTier} of ${catTotal/4} per tier • Output: <code>output_production/${slug}</code></div></div>
+    <div class="banner-stat-box"><span style="font-size:24px;font-weight:800;color:#38BDF8">${perTier}</span>
+    <div style="font-size:11px;text-transform:uppercase;color:#C7D2FE">Prompts Ready</div></div>`;
+  vp.appendChild(banner);
+  const grid=document.createElement('div'); grid.className='cards-grid';
+  items.forEach(p=>{
+    const isSet2 = p.category_index>100 && p.category_index<=200;
+    const isSet3 = p.category_index>200;
+    const card=document.createElement('div');
+    card.className='prompt-card'+(isSet2||isSet3?' new-set':'');
+    card.id=`card-${p.id}`;
+    const exists = diskInventory[p.filename];
+    let pills = `<span class="card-idx-pill">#${p.category_index} of ${catTotal/4}</span><span class="card-age-pill">${p.age_group}</span>`;
+    if(isSet2) pills+='<span class="card-new-pill">NEW Set 2</span>';
+    if(isSet3) pills+='<span class="card-new-pill">NEW Set 3</span>';
+    if(isFractal) pills+='<span class="card-fractal-pill">🌀 Fractal</span>';
+    card.innerHTML=`<div><div class="card-topbar">${pills}</div>
+      <div class="card-title">${p.subject}</div>
+      <div class="card-meta">${p.filename}</div>
+      <div class="card-image-preview" id="preview-box-${p.id}" style="display:${exists?'block':'none'}">
+        <img id="img-${p.id}" src="${exists?exists:''}"><span class="preview-badge">✓ Forged</span>
+      </div>
+      <div class="prompt-box" onclick="highlightText(this)">${p.master_prompt}</div></div>
+      <div class="card-actions-row">
+        <button class="btn-forge" id="forge-btn-${p.id}" onclick="forgeImage(${p.id})">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          ${exists?'Re-Forge':'⚡ Forge Image'}
+        </button>
+        <button class="btn-copy" onclick="copyCardPrompt(${p.id},this)">📋 Copy</button>
+      </div>`;
+    grid.appendChild(card);
+  });
+  vp.appendChild(grid);
+}
+
+async function forgeImage(id){
+  const p=currentPrompts.find(x=>x.id===id); if(!p) return;
+  const btn=document.getElementById(`forge-btn-${id}`); const o=btn.innerHTML;
+  btn.disabled=true; btn.innerHTML='⏳ Forging...';
+  const hasKey=openAiApiKey&&openAiApiKey.startsWith('sk-');
+  const endpoint=hasKey?'/api/forge_image':'/api/test_forge';
+  try{
+    const r=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({apiKey:openAiApiKey,prompt:p.master_prompt,category_slug:p.category_slug,filename:p.filename})});
+    const d=await r.json();
+    if(d.success){
+      const box=document.getElementById(`preview-box-${id}`); const img=document.getElementById(`img-${id}`);
+      img.src=d.image_url+'?t='+Date.now(); box.style.display='block'; diskInventory[p.filename]=d.image_url;
+      btn.innerHTML='✓ Saved!'; btn.style.background='#059669';
+      setTimeout(()=>{btn.innerHTML='⚡ Re-Forge';btn.style.background='';btn.disabled=false},2500);
+      showToast(`✓ Saved output_production/${p.category_slug}/${p.filename}`);
+    }else{alert('Forge error: '+d.error);btn.innerHTML=o;btn.disabled=false}
+  }catch(err){alert('Network: '+err.message);btn.innerHTML=o;btn.disabled=false}
+}
+
+function updateApiStatus(){
+  const d=document.getElementById('apiDot'),t=document.getElementById('apiStatusText');
+  if(openAiApiKey&&openAiApiKey.startsWith('sk-')){d.className='dot green';t.innerText='DALL-E 3 Ready'}
+  else{d.className='dot yellow';t.innerText='Test Mode'}
+}
+function openApiKeyModal(){document.getElementById('apiKeyInput').value=openAiApiKey;document.getElementById('apiKeyModal').style.display='flex'}
+function closeApiKeyModal(){document.getElementById('apiKeyModal').style.display='none'}
+function saveApiKey(){openAiApiKey=document.getElementById('apiKeyInput').value.trim();localStorage.setItem('openai_api_key',openAiApiKey);updateApiStatus();closeApiKeyModal();showToast('API key saved')}
+function clearApiKey(){openAiApiKey='';localStorage.removeItem('openai_api_key');document.getElementById('apiKeyInput').value='';updateApiStatus();closeApiKeyModal();showToast('Test mode')}
+
+async function openIdeasModal(){document.getElementById('nicheIdeasModal').style.display='flex';fetchMoreIdeas()}
+function closeIdeasModal(){document.getElementById('nicheIdeasModal').style.display='none'}
+function renderNicheCard(n,bucket){
+  const box=document.createElement('div');
+  const isInstalled=!!n.installed;
+  const isSuggested=bucket==='suggested';
+  const badgeColor = isInstalled?'#D1FAE5':(isSuggested?'#EDE9FE':'#FEF3C7');
+  const badgeTextColor = isInstalled?'#065F46':(isSuggested?'#5B21B6':'#92400E');
+  const badgeLabel = isInstalled?'✓ Installed':(isSuggested?'✨ Request in Chat':'Available');
+  box.className='niche-card'+(isInstalled?' installed':'');
+  box.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px">
+      <strong style="font-size:15px;color:var(--dark)">${n.title}</strong>
+      <span style="font-size:11px;background:${badgeColor};color:${badgeTextColor};padding:2px 8px;border-radius:10px;font-weight:700;white-space:nowrap">${badgeLabel}</span>
+    </div>
+    <div style="font-size:12px;color:#475569;margin-bottom:8px">${n.hook} <em style="color:var(--primary)">(${n.crossover})</em></div>
+    <div style="background:#0F172A;color:#38BDF8;font-family:monospace;font-size:11px;padding:8px;border-radius:6px;margin-bottom:10px;cursor:pointer" onclick="highlightText(this)">${n.sample_prompt}</div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+      <button class="btn" onclick='copyCustomText(${JSON.stringify(n.sample_prompt)},this)'>📋 Copy Sample</button>
+      ${isInstalled?`<button class="btn btn-accent" onclick='jumpToNiche(${JSON.stringify(n.title.replace(/^\S+\s/,''))})'>➡️ Open</button>`
+        :isSuggested?`<button class="btn btn-accent" onclick="showToast('Ask me in chat to build this niche!')">💬 Request This Niche</button>`
+        :'<span style="color:#64748B;font-size:12px;align-self:center">Drop the pack JSON into Data &amp; Backups, then restart the server.</span>'}
+    </div>`;
+  return box;
+}
+async function fetchMoreIdeas(){
+  const c=document.getElementById('nicheIdeasList'); c.innerHTML='Loading...';
+  try{
+    const r=await fetch('/api/discover_ideas'); const d=await r.json(); c.innerHTML='';
+    if(!d.installed_niches||!d.suggested_niches){ c.innerHTML='<div style="color:#EF4444">Server is running an older API — restart server to use the new Discover UI.</div>'; return; }
+    const h1=document.createElement('div');h1.style.cssText='font-weight:800;color:var(--dark);font-size:14px;margin:10px 0 6px;padding:4px 0 4px 10px;border-left:4px solid var(--primary)';h1.innerText=`✅ Installed Niches (${d.installed_niches.filter(x=>x.installed).length}) — already in the master library`;c.appendChild(h1);
+    d.installed_niches.forEach(n=>{if(n.installed)c.appendChild(renderNicheCard(n,'installed'))});
+    const anyAvailable=d.installed_niches.some(n=>!n.installed);
+    if(anyAvailable){
+      const h2=document.createElement('div');h2.style.cssText='font-weight:800;color:var(--dark);font-size:14px;margin:18px 0 6px;padding:4px 0 4px 10px;border-left:4px solid #F59E0B';h2.innerText='📦 Available to Add (drop pack JSON and restart)';c.appendChild(h2);
+      d.installed_niches.forEach(n=>{if(!n.installed)c.appendChild(renderNicheCard(n,'available'))});
+    }
+    const h3=document.createElement('div');h3.style.cssText='font-weight:800;color:var(--dark);font-size:14px;margin:18px 0 6px;padding:4px 0 4px 10px;border-left:4px solid #8B5CF6';h3.innerText='✨ Suggested Future Niches (ask me to build one in chat!)';c.appendChild(h3);
+    d.suggested_niches.forEach(n=>c.appendChild(renderNicheCard(n,'suggested')));
+  }catch(e){c.innerHTML='<div style="color:#EF4444">Error: '+e.message+'</div>'}
+}
+function jumpToNiche(lbl){closeIdeasModal();selectCategory(lbl)}
+
+function handleSearch(){
+  const q=document.getElementById('globalSearch').value.toLowerCase().trim();
+  const base=activePrompts().filter(matches);
+  renderCards(q?base.filter(p=>p.subject.toLowerCase().includes(q)||(p.action||'').toLowerCase().includes(q)||(p.environment||'').toLowerCase().includes(q)):base);
+}
+function highlightText(el){const s=window.getSelection();const r=document.createRange();r.selectNodeContents(el);s.removeAllRanges();s.addRange(r);showToast('Highlighted — Ctrl/Cmd+C')}
+function showToast(m){const t=document.getElementById('toastMessage');t.innerText=m;t.style.display='block';setTimeout(()=>t.style.display='none',2600)}
+
+async function copyCardPrompt(id,btn){const p=currentPrompts.find(x=>x.id===id);if(p)copyCustomText(p.master_prompt,btn)}
+async function copyCustomText(text,btn){
+  let ok=false;
+  if(navigator.clipboard&&window.isSecureContext) try{await navigator.clipboard.writeText(text);ok=true}catch(e){}
+  if(!ok) try{const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.focus();ta.select();ok=document.execCommand('copy');document.body.removeChild(ta)}catch(e){}
+  if(ok){if(btn){const o=btn.innerHTML;btn.innerHTML='✓ Copied';setTimeout(()=>btn.innerHTML=o,1500)}showToast('✓ Copied')}else openCopyModal('Copy',text);
+}
+function openCopyModal(h,t){document.getElementById('copyModalHeader').innerText=h;document.getElementById('copyModalText').value=t;document.getElementById('copyFallbackModal').style.display='flex';setTimeout(()=>{const x=document.getElementById('copyModalText');x.focus();x.select()},50)}
+function closeCopyModal(){document.getElementById('copyFallbackModal').style.display='none'}
+function copyFromModalText(){const x=document.getElementById('copyModalText');x.focus();x.select();try{document.execCommand('copy');showToast('✓ Copied');closeCopyModal()}catch(e){showToast('Press Ctrl/Cmd+C')}}
+function copyCurrentView(){const txt=currentPrompts.map(p=>`[#${p.category_index} - ${p.subject} (${p.age_group})]\n${p.master_prompt}\n`).join('\n---\n\n');openCopyModal(`${currentCategory} (${currentAgeGroup}, ${currentPrompts.length} prompts)`,txt)}
+function exportCSV(){
+  if(!currentPrompts.length) return;
+  let csv="id,category,age_group,subject,action,environment,filename,master_prompt\n";
+  currentPrompts.forEach(p=>{csv+=`"${p.id}","${p.category_id}","${p.age_group}","${p.subject}","${(p.action||'').replace(/"/g,'""')}","${(p.environment||'').replace(/"/g,'""')}","${p.filename}","${p.master_prompt.replace(/"/g,'""')}"\n`});
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download=`coloring_${currentPrompts[0].category_slug}_${currentAgeGroup.replace(/[^a-z0-9]/gi,'_')}_${currentBatch}.csv`;a.click();
+}
+
+// -------- Storage modal / import / export -------------------------------
+function openStorageModal(){document.getElementById('storageModal').style.display='flex';document.getElementById('importStatus').innerText=''}
+function closeStorageModal(){document.getElementById('storageModal').style.display='none'}
+
+function triggerDownload(filename, content, mime){
+  const blob = content instanceof Blob ? content : new Blob([content],{type:mime});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=filename;
+  a.style.display='none';
+  document.body.appendChild(a);
+  // Use a user-gesture timeout and release the object URL after a tick.
+  requestAnimationFrame(()=>{
+    a.click();
+    setTimeout(()=>{
+      document.body.removeChild(a);
+      setTimeout(()=>URL.revokeObjectURL(url), 1000);
+    }, 50);
+  });
+}
+async function downloadLibrary(scope, format){
+  const ts = new Date().toISOString().slice(0,10);
+  // Route full-library exports to SERVER endpoints to avoid 45 MB client-side
+  // JSON.stringify / CompressionStream heap pressure that silently fails downloads.
+  if(scope==='all'){
+    let url;
+    if(format==='csv') url='/api/export/csv';
+    else if(format==='json.gz') url='/api/export/json_gz';
+    else url='/api/export/json';
+    showToast('Preparing download from server...');
+    // Plain <a download> click inside this user gesture is reliable.
+    const a=document.createElement('a'); a.href=url; a.style.display='none';
+    document.body.appendChild(a);
+    requestAnimationFrame(()=>{ a.click(); setTimeout(()=>document.body.removeChild(a),500); });
+    showToast('Download started — check your Downloads folder');
+    return;
+  }
+  // Current-view scope stays client-side (small)
+  let data = currentPrompts;
+  if(format==='csv'){
+    let csv="id,category,age_group,subject,action,environment,filename,master_prompt\n";
+    data.forEach(p=>{csv+=`"${p.id}","${p.category_id}","${p.age_group}","${p.subject}","${(p.action||'').replace(/"/g,'""')}","${(p.environment||'').replace(/"/g,'""')}","${p.filename}","${p.master_prompt.replace(/"/g,'""')}"\n`});
+    triggerDownload(`coloring_prompts_${scope}_${ts}.csv`,csv,'text/csv');
+    showToast(`Downloaded ${data.length.toLocaleString()} rows as CSV`);
+    return;
+  }
+  const json = JSON.stringify(data);
+  if(format==='json.gz'){
+    const enc = new TextEncoder(); const buf=enc.encode(json);
+    const cs = new CompressionStream('gzip'); const w=cs.writable.getWriter();
+    w.write(buf); w.close();
+    const reader=cs.readable.getReader(); const chunks=[];
+    while(true){const{done,value}=await reader.read();if(done)break;chunks.push(value)}
+    const blob=new Blob(chunks,{type:'application/gzip'});
+    triggerDownload(`coloring_prompts_${data.length}_${ts}.json.gz`,blob,'application/gzip');
+    showToast(`Downloaded ${data.length.toLocaleString()} prompts (gzipped)`);
+  }else{
+    triggerDownload(`coloring_prompts_${data.length}_${ts}.json`,json,'application/json');
+    showToast(`Downloaded ${data.length.toLocaleString()} prompts as JSON`);
+  }
+}
+
+async function gunzip(buf){
+  const ds = new DecompressionStream('gzip'); const w=ds.writable.getWriter();
+  w.write(new Uint8Array(buf)); w.close();
+  const r=ds.readable.getReader(); const chunks=[];
+  while(true){const{done,value}=await r.read();if(done)break;chunks.push(value)}
+  return await new Blob(chunks,{type:'application/json'}).text();
+}
+
+async function importLibrary(){
+  const file = document.getElementById('importFile').files[0];
+  const status=document.getElementById('importStatus');
+  if(!file){status.innerText='⚠️ Select a JSON or .json.gz file first.';status.style.color='#92400E';return}
+  status.innerText='Reading file...';
+  try{
+    const buf = await file.arrayBuffer();
+    let text;
+    if(file.name.endsWith('.gz')){ text = await gunzip(buf); } else { text = await new Blob([buf]).text(); }
+    const imported = JSON.parse(text);
+    const arr = Array.isArray(imported) ? imported : (imported.prompts||[]);
+    if(!arr.length){status.innerText='⚠️ No prompt records found in file.';status.style.color='#991B1B';return}
+    // Schema sanity check
+    const required = ['master_prompt','category_id','category_slug','filename','age_group','category_index','subject'];
+    const sample = arr[0];
+    const missing = required.filter(k=>!(k in sample));
+    if(missing.length){status.innerText=`⚠️ File missing fields: ${missing.join(', ')}`;status.style.color='#991B1B';return}
+    // Merge into active set (dedup by master_prompt)
+    const base = activePrompts();
+    const seen = new Set(base.map(r=>r.master_prompt));
+    let added=0; let nextId = Math.max(...base.map(r=>r.id||0))+1;
+    arr.forEach(r=>{
+      if(seen.has(r.master_prompt)) return;
+      seen.add(r.master_prompt);
+      if(!r.id) r.id=nextId++;
+      base.push(r); added++;
+    });
+    // Rebuild category counts
+    categoryCounts={};
+    const newCats=new Set(categoriesMeta.map(c=>c[0]));
+    base.forEach(p=>{
+      categoryCounts[p.category_id]=(categoryCounts[p.category_id]||0)+1;
+      if(!newCats.has(p.category_id)){
+        // add to sidebar with ✨ emoji
+        categoriesMeta.push([p.category_id,'✨',p.category_id]);
+        newCats.add(p.category_id);
+      }
+    });
+    localPrompts = base;
+    // Set local storage so reloads remember this was imported
+    // (Don't stringify 36k into localStorage; just set a flag.)
+    status.innerText=`✓ Merged ${added} new prompts. Total now ${base.length.toLocaleString()}. A download of the merged library is recommended for production deploy.`;
+    status.style.color='#065F46';
+    document.getElementById('brandTagline').innerText=`${base.length.toLocaleString()} Prompts (with merged imports) • DALL-E 3`;
+    updateStorageBar();
+    renderSidebar();
+    // Offer download of the merged file automatically
+    await new Promise(r=>setTimeout(r,300));
+    downloadLibrary('all','json.gz');
+    await loadPrompts();
+  }catch(e){
+    status.innerText='⚠️ Import failed: '+e.message; status.style.color='#991B1B';
+  }
+}
+function resetLibrary(){
+  if(!confirm('Discard merged imports and reload from server?')) return;
+  localPrompts=null; categoryCounts={};
+  document.getElementById('importFile').value='';
+  document.getElementById('importStatus').innerText='';
+  loadMeta().then(()=>{renderSidebar();loadPrompts();showToast('Reset to server library')});
+}
+
+// -------- Book Builder view ------------------------------------------------
+function openBookBuilder(){
+  populateBookCategories();
+  document.getElementById('bookBuilderPanel').style.display='flex';
+  document.getElementById('bookBuilderPanel').scrollTop=0;
+}
+function closeBookBuilder(){ document.getElementById('bookBuilderPanel').style.display='none' }
+
+function openProductionBot(){ renderProductionBot(); document.getElementById('productionBotPanel').style.display='flex'; document.getElementById('productionBotPanel').scrollTop=0; }
+function closeProductionBot(){ document.getElementById('productionBotPanel').style.display='none' }
+function nextPublishingSlot(){
+  // Returns next Tue or Fri at 9 AM ET
+  const now=new Date();
+  const days=[2,5]; // Tue=2, Fri=5 (Sun=0)
+  const candidates=[];
+  for(let d=0;d<14;d++){
+    const c=new Date(now); c.setDate(now.getDate()+d); c.setHours(9,0,0,0);
+    // ET offset rough: UTC-4 (EDT) / -5 (EST). We'll just output local date labels; user can adjust.
+    if(days.includes(c.getDay()) && c>now) candidates.push(c);
+  }
+  return candidates[0]||new Date(now.getTime()+86400000*2);
+}
+function fmtDate(d){return d.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric',year:'numeric'})+' at 9 AM ET'}
+let prodQueue = JSON.parse(localStorage.getItem('prodQueue')||'[]');
+function saveProdQueue(){localStorage.setItem('prodQueue',JSON.stringify(prodQueue))}
+function renderProductionBot(){
+  const slot=document.getElementById('prodNextSlot'); if(!slot) return;
+  const next=nextPublishingSlot();
+  const queueAfter = new Date(next.getTime()+(prodQueue.length?3.5*86400000*prodQueue.length:0));
+  slot.innerHTML=`<strong>📆 Next launch:</strong> ${fmtDate(next)}<br><span style="color:var(--muted)">Queued ahead: ${prodQueue.length} book(s) · Estimated launch after queue: ${fmtDate(queueAfter)}</span>`;
+  const q=document.getElementById('prodQueue');
+  if(!prodQueue.length){ q.innerHTML='<em style="color:var(--muted)">Queue empty — click "Auto-Plan Next Book Now" or "+ Add AI-picked book" to queue one.</em>'; return; }
+  q.innerHTML=prodQueue.map((b,i)=>`<div style="display:flex;justify-content:space-between;gap:6px;padding:6px;border-bottom:1px solid var(--border);font-size:12px">
+    <div><strong>${i+1}.</strong> ${b.emoji||'📘'} ${b.title||'(planned)'}<br><span style="color:var(--muted)">${b.category_id||''} · ${b.age_group||''} · ${b.page_count||60}p · ${b.trim_size||'8.5x11'}</span></div>
+    <button class="btn" style="padding:2px 8px;font-size:11px" onclick="removeQueued(${i})">✕</button></div>`).join('');
+}
+async function enqueueRandomBook(){
+  try{
+    const r=await fetch('/api/auto_book_plan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({openai_api_key:openAiApiKey})});
+    const d=await r.json();
+    if(!d.success){ showToast('Error: '+d.error); return; }
+    prodQueue.push(d.plan); saveProdQueue(); renderProductionBot();
+    showToast(`📚 Queued: ${d.plan.title}`);
+  }catch(e){ showToast('Error: '+e.message); }
+}
+function removeQueued(i){ prodQueue.splice(i,1); saveProdQueue(); renderProductionBot(); }
+function clearProdQueue(){ if(confirm('Clear entire publishing queue?')){ prodQueue=[]; saveProdQueue(); renderProductionBot(); } }
+
+async function autoPlanBook(){
+  const btn=event.target; const o=btn.innerHTML; btn.disabled=true; btn.innerHTML='✨ Planning...';
+  const summary=document.getElementById('autoPlanSummary'); summary.style.display='block'; summary.innerText='Asking GPT-4o-mini + KDP evergreen model for the next winning book...';
+  try{
+    const r=await fetch('/api/auto_book_plan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({openai_api_key:openAiApiKey})});
+    const d=await r.json();
+    if(!d.success){ summary.style.color='#991B1B'; summary.innerText='❌ '+d.error; btn.disabled=false; btn.innerHTML=o; return; }
+    const p=d.plan;
+    // Apply plan to form
+    const catSel=document.getElementById('bkCategory');
+    // wait for populate
+    if(!catSel.options.length) populateBookCategories();
+    for(const opt of catSel.options){ if(opt.value===p.category_id){ catSel.value=p.category_id; break; } }
+    const ageSel=document.getElementById('bkAge');
+    for(const opt of ageSel.options){ if(opt.value===p.age_group){ ageSel.value=p.age_group; break; } }
+    const sizeMap={'8.5x11':'8.5x11','8x10':'8x10','7.5x9.25':'7.5x9.25','6x9':'6x9'};
+    document.getElementById('bkSize').value=sizeMap[p.trim_size]||'8.5x11';
+    document.getElementById('bkBleed').value= p.bleed&&p.bleed.startsWith('0.125')?'bleed':'bleed';
+    document.getElementById('bkPaper').value= p.paper_color==='cream'?'cream':'white';
+    document.getElementById('bkPages').value= p.page_count||60;
+    document.getElementById('bkIncludePrompts').checked= !!p.include_prompt_pages;
+    document.getElementById('bkTitle').value= p.title||'';
+    document.getElementById('bkSubtitle').value= p.subtitle||'';
+    document.getElementById('bkAuthor').value= p.author||'';
+    document.getElementById('bkBlurb').value= p.blurb||'';
+    // cover style + palette
+    const styleSel=document.getElementById('bkCoverStyle');
+    if(styleSel) for(const opt of styleSel.options){ if(opt.value===p.cover_style){ styleSel.value=p.cover_style; break; } }
+    // cover palette mapping (server may return descriptive string; UI uses preset keys)
+    const palInput=document.getElementById('bkCoverColor');
+    if(palInput && p.cover_palette){
+      const pal=p.cover_palette.toLowerCase();
+      let mapped='pastel';
+      if(/bold|primary|red.*blue.*yellow/.test(pal)) mapped='bold';
+      else if(/dark|night|black/.test(pal)) mapped='dark';
+      else if(/sunset|warm|orange|pink.*gold/.test(pal)) mapped='warm';
+      else if(/forest|earth|green|brown/.test(pal)) mapped='forest';
+      else if(/ocean|blue|sea/.test(pal)) mapped='blue';
+      else if(/purple|royal|gold/.test(pal)) mapped='purple';
+      else if(/neon|pop|bright/.test(pal)) mapped='neon';
+      palInput.value=mapped;
+    }
+    // batch selector (set1/set2/set3/shuffled) - may be <select> or radios
+    const batch=(p.batch||'shuffle').toLowerCase();
+    const batchSelect=document.getElementById('bkBatch');
+    if(batchSelect){
+      const map={'set1':'1','set2':'2','set3':'3','all':'all','shuffle':'shuffle','shuffled':'shuffle','mix':'all','mixed':'all'};
+      batchSelect.value=map[batch]||'shuffle';
+    }else{
+      const all=document.querySelectorAll('.batch-radio,input[name=bkBatch]');
+      all.forEach(r=>{ if((r.value||'').toLowerCase()===batch) r.checked=true; });
+    }
+    summary.style.color='#065F46';
+    summary.innerHTML = `<strong>✅ Plan generated${p.gpt_powered?' (GPT-4o-mini)':' (heuristic — add OpenAI key for smarter titles)'}:</strong><br>
+      📚 <strong>${p.title}</strong><br>
+      🏷️ ${p.subtitle||''}<br>
+      ✍️ ${p.author} · ${p.page_count} pages · ${p.trim_size} · ${p.paper_color} paper<br>
+      🎯 Niche: ${p.emoji||''} ${p.category_id} (${p.age_group}) · Batch: ${p.batch||'shuffled'}<br>
+      🔍 Keywords: ${(p.key_search_terms||[]).slice(0,6).join(', ')}<br>
+      📅 Publishing cadence: 2 books/week per KDP account (Tue + Fri 9 AM ET best for ranking).`;
+    showToast('✨ Book planned! Review then click "Download Book Package"');
+  }catch(e){
+    summary.style.color='#991B1B'; summary.innerText='❌ Network error: '+e.message;
+  }finally{ btn.disabled=false; btn.innerHTML=o; }
+}
+
+function populateBookCategories(){
+  const sel=document.getElementById('bkCategory');
+  if(sel.options.length) return;
+  categoriesMeta.forEach(([id,icon,label])=>{
+    const opt=document.createElement('option'); opt.value=id; opt.innerText=`${icon} ${label}`; sel.appendChild(opt);
+  });
+}
+
+function generateBookPackage(){
+  const status=document.getElementById('bookBuildStatus');
+  status.style.color='var(--muted)';
+  const book = readBookSettings();
+  if(!book.title){ status.innerText='⚠️ Enter a book title first.'; status.style.color='#991B1B'; return; }
+
+  // Select prompts
+  const all = activePrompts();
+  let pool = all.filter(p=>p.category_id===book.category && (book.age==='MIX' || p.age_group===book.age));
+  if(book.batch==='1') pool = pool.filter(p=>p.category_index>=1 && p.category_index<=100);
+  else if(book.batch==='2') pool = pool.filter(p=>p.category_index>100 && p.category_index<=200);
+  else if(book.batch==='3') pool = pool.filter(p=>p.category_index>200);
+  else if(book.batch==='shuffle'){
+    pool = [...pool].sort(()=>Math.random()-0.5);
+  }
+  if(pool.length < book.pages){
+    status.innerText=`⚠️ Only ${pool.length} prompts match these filters (need ${book.pages}). Expand batch/age filters or reduce page count.`;
+    status.style.color='#991B1B'; return;
+  }
+  pool = pool.slice(0, book.pages);
+
+  const bookSlug = book.title.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'').slice(0,40)||'coloring_book';
+  const ts = new Date().toISOString().slice(0,10);
+
+  // Build pages manifest
+  const pages = [];
+  const bleed = book.bleed==='bleed';
+  const [w,h] = book.size.split('x').map(Number);
+  pages.push({kind:'cover_front', title:'Front Cover', prompt: buildCoverPrompt(book, 'front')});
+  pages.push({kind:'inside_title', title:'Title Page', text:`${book.title}\n${book.subtitle}\nby ${book.author}`});
+    pages.push({kind:'inside_copyright', title:'Copyright', text:`© ${new Date().getFullYear()} ${book.author}. All rights reserved.\nPrinted in the United States.\nPublished via Amazon KDP.\n${book.paper==='cream'?'Cream':'White'} interior • ${book.bleed==='bleed'?'Bleed':'No bleed'} • ${w} × ${h}`});
+  pool.forEach((p,i)=>{
+    pages.push({kind:'coloring_page', page_num: i+1, title: p.subject, prompt: p.master_prompt, source_filename: p.filename, category_slug: p.category_slug, age_group: p.age_group});
+    if(book.includePrompts) pages.push({kind:'prompt_page', text: p.master_prompt});
+  });
+  pages.push({kind:'about_author', title:'About the Author', text: `About ${book.author}\n\nAdd your author bio here in the manifest before uploading.`});
+  pages.push({kind:'cover_back', title:'Back Cover', prompt: buildCoverPrompt(book, 'back'), blurb: book.blurb});
+
+  const manifest = {
+    kdp:{trim_size:book.size,bleed:book.bleed,paper:book.paper,total_pages:pages.length},
+    book:{title:book.title,subtitle:book.subtitle,author:book.author,category:book.category,age:book.age,slug:bookSlug},
+    pages
+  };
+
+  // 1. Download manifest JSON
+  triggerDownload(`book_${bookSlug}_manifest_${ts}.json`, JSON.stringify(manifest,null,2), 'application/json');
+
+  // 2. CSV
+  let csv = 'page,kind,title,prompt,filename\n';
+  pages.forEach((p,i)=>{csv+=`${i+1},"${p.kind}","${(p.title||'').replace(/"/g,'""')}","${(p.prompt||'').replace(/"/g,'""')}","${p.source_filename||''}"\n`});
+  triggerDownload(`book_${bookSlug}_prompts_${ts}.csv`, csv, 'text/csv');
+
+  // 3. KDP preview HTML
+  const htmlPreview = buildPreviewHTML(manifest);
+  triggerDownload(`book_${bookSlug}_preview_${ts}.html`, htmlPreview, 'text/html');
+
+  // 4. forge_runner.py script
+  const runner = buildForgeRunner(manifest);
+  triggerDownload(`book_${bookSlug}_forge_runner_${ts}.py`, runner, 'text/x-python');
+
+  // 5. Cover/back-cover prompt sheet
+  let sheet = `# Cover Prompts for "${book.title}"\n\n`;
+  sheet += `## Front Cover (${w}×${h} ${bleed?'with bleed':'no bleed'})\n${pages.find(p=>p.kind==='cover_front').prompt}\n\n`;
+  sheet += `## Back Cover\n${pages.find(p=>p.kind==='cover_back').prompt}\n\n`;
+  sheet += `Run this script locally: python3 book_${bookSlug}_forge_runner_${ts}.py`;
+  triggerDownload(`book_${bookSlug}_cover_prompts_${ts}.md`, sheet, 'text/markdown');
+
+  status.innerText = `✅ Package ready. Downloaded 5 files for a ${pages.length}-page book, slug "${bookSlug}". Move them to your production machine and run the forge_runner script.`;
+  status.style.color = '#065F46';
+}
+
+function readBookSettings(){
+  return {
+    size: document.getElementById('bkSize').value,
+    bleed: document.getElementById('bkBleed').value,
+    paper: document.getElementById('bkPaper').value,
+    pages: parseInt(document.getElementById('bkPages').value||'50',10),
+    title: document.getElementById('bkTitle').value.trim(),
+    subtitle: document.getElementById('bkSubtitle').value.trim(),
+    author: document.getElementById('bkAuthor').value.trim(),
+    category: document.getElementById('bkCategory').value,
+    age: document.getElementById('bkAge').value,
+    batch: document.getElementById('bkBatch').value,
+    coverStyle: document.getElementById('bkCoverStyle').value,
+    coverColor: document.getElementById('bkCoverColor').value,
+    blurb: document.getElementById('bkBlurb').value.trim(),
+    includePrompts: document.getElementById('bkIncludePrompts').checked,
+    testMode: document.getElementById('bkTestMode').checked,
+  };
+}
+
+function buildCoverPrompt(book, side){
+  const [w,h]=book.size.split('x');
+  const bleedSuffix = book.bleed==='bleed'?' with 0.125 inch bleed on all sides, KDP paperback cover':'';
+  const ratio = `${w}x${h}`;
+  if(side==='front'){
+    return "portrait orientation, KDP paperback front cover illustration " + ratio + " ratio" + bleedSuffix + ", coloring book cover style, bold black outlines, pure white background, " + (book.coverStyle==='boldtitle'?'single large friendly hero illustration in center':book.coverStyle==='collage'?'collage of 4-6 small vignettes arranged in a grid':book.coverStyle==='minimal'?'minimal decorative border frame, large empty space for title':'circular wreath frame with central decoration') + ", " + (book.coverColor==='pastel'?'soft pastel color accents':book.coverColor==='bold'?'bold primary color accents':book.coverColor==='earthy'?'earthy terracotta/olive color accents':'monochrome black with one bold accent color') + ", themed around " + book.category + " for " + (book.age==='MIX'?'all ages':book.age) + ", clean vector line art, no shading, no gradients, no grayscale, no colors (outlines only), high contrast coloring book cover line art --ar " + Math.min(w/h*1.2,1.8).toFixed(2) + ":1.0";
+  } else {
+    return "portrait orientation, KDP paperback back cover design " + ratio + " ratio" + bleedSuffix + ", coloring book back cover, bold black outlines, pure white background, central rectangular frame for book description blurb, small illustration in a corner themed around " + book.category + ", decorative border, author bio placeholder, clean vector line art, no shading, no gradients, no grayscale, no colors, high contrast coloring book cover line art --ar " + Math.min(w/h*1.2,1.8).toFixed(2) + ":1.0";
+  }
+}
+
+function buildPreviewHTML(manifest){
+  const [w,h]=manifest.kdp.trim_size.split('x').map(Number);
+  const bleedPx = manifest.kdp.bleed==='bleed'?20:0;
+  const wPx = Math.round(w*80), hPx=Math.round(h*80);
+  let pagesHtml='';
+  manifest.pages.forEach((p,i)=>{
+    pagesHtml+=`<div class="page" style="width:${wPx+bleedPx*2}px;height:${hPx+bleedPx*2}px">`+
+      `<div class="page-label">Page ${i+1} · ${p.kind.replace('_',' ')}</div>`+
+      (p.prompt?`<div class="prompt-preview">${p.prompt.replace(/</g,'&lt;')}</div>`:'')+
+      (p.text?`<div class="text-preview"><pre>${p.text.replace(/</g,'&lt;')}</pre></div>`:'')+
+      `</div>`;
+  });
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${manifest.book.title} — KDP Preview</title>
+<style>
+body{font-family:system-ui;background:#F1F5F9;padding:24px;color:#1E293B}
+h1{margin-bottom:6px}
+.sub{color:#64748B;margin-bottom:24px}
+.page{background:#fff;border:1px solid #CBD5E1;margin:14px auto;box-shadow:0 4px 12px rgba(0,0,0,.08);padding:18px;position:relative;overflow:hidden;page-break-after:always}
+.page-label{position:absolute;top:6px;right:10px;font-size:10px;color:#94A3B8;text-transform:uppercase;letter-spacing:.5px}
+.prompt-preview{font-family:ui-monospace,monospace;font-size:11px;color:#0F172A;background:#F8FAFC;padding:10px;border-radius:6px;margin-top:8px;border:1px dashed #94A3B8;white-space:pre-wrap}
+.text-preview{padding:40px;text-align:center;font-size:18px;line-height:1.6}
+.text-preview pre{white-space:pre-wrap;font-family:inherit}
+@media print{body{background:#fff;padding:0}.page{box-shadow:none;margin:0;border:0;page-break-after:always}}
+</style></head><body>
+<h1>${manifest.book.title}</h1><div class="sub">${manifest.book.subtitle} · by ${manifest.book.author} · ${manifest.kdp.trim_size} · ${manifest.kdp.bleed} · ${manifest.pages.length} pages</div>
+${pagesHtml}
+</body></html>`;
+}
+
+function buildForgeRunner(manifest){
+  return `#!/usr/bin/env python3
+"""Auto-forge runner for KDP book: ${manifest.book.title}
+
+Usage:
+  1. export OPENAI_API_KEY=sk-...
+  2. python3 __FILE__
+Images are saved to output_production/${manifest.book.slug}/ using the filenames in the manifest.
+"""
+import os, json, base64, time, urllib.request, urllib.error, sys
+
+API_KEY = os.environ.get("OPENAI_API_KEY","")
+BOOK_DIR = os.path.join("output_production", "${manifest.book.slug}")
+MANIFEST = os.path.join(os.path.dirname(__file__), os.path.basename(__file__).replace("forge_runner","manifest").replace(".py",".json"))
+
+def load_pages():
+    with open(MANIFEST, encoding="utf-8") as f:
+        return json.load(f)["pages"]
+
+def forge(prompt, filename):
+    if os.path.exists(filename): return False
+    if not API_KEY:
+        print(f"[TEST] would forge: {filename}"); return False
+    payload = {"model":"dall-e-3","prompt":prompt,"n":1,"size":"1024x1792","quality":"standard","response_format":"b64_json"}
+    req = urllib.request.Request("https://api.openai.com/v1/images/generations",
+        data=json.dumps(payload).encode(),
+        headers={"Content-Type":"application/json","Authorization":f"Bearer {API_KEY}"})
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(req, timeout=120) as r:
+                data = json.loads(r.read())
+            img = base64.b64decode(data["data"][0]["b64_json"])
+            with open(filename,"wb") as f: f.write(img)
+            return True
+        except urllib.error.HTTPError as e:
+            err=e.read().decode(); print(f"HTTP error: {e.code} {err[:200]}"); time.sleep(5)
+        except Exception as e:
+            print(f"error: {e}"); time.sleep(5)
+    return False
+
+def main():
+    os.makedirs(BOOK_DIR, exist_ok=True)
+    pages = load_pages()
+    total = len([p for p in pages if 'prompt' in p])
+    done = 0
+    for i,p in enumerate(pages):
+        if "prompt" not in p: continue
+        fn = os.path.join(BOOK_DIR, f"page_{i+1:03d}_{p['kind']}.png")
+        ok = forge(p["prompt"], fn)
+        done += 1
+        print(f"[{done}/{total}] {fn} {'OK' if ok else '(skipped)'}")
+        time.sleep(1.2)
+    print("Done.")
+
+if __name__ == "__main__":
+    if not API_KEY:
+        print("No OPENAI_API_KEY set. Running in dry-run/test mode. Set the env var for real forging.")
+    main()
+`;
+}
+
+async function forgeAllBookImages(){
+  const status=document.getElementById('bookBuildStatus');
+  status.innerText='⚠️ Forging from this sandbox is disabled to avoid hitting storage/credit limits. Download the Book Package and run forge_runner.py on your production server with OPENAI_API_KEY set.';
+  status.style.color='#92400E';
+}
+
+init();
+</script>
+</body>
+</html>
